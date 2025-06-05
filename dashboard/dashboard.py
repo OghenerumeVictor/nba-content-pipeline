@@ -10,6 +10,11 @@ from agents.summarizer import generate_summary
 from agents.formatter import format_outputs
 from agents.publisher import publish_all, fetch_thumbnail_url
 
+# Inject Streamlit secrets into os.environ for use in agent modules
+import os
+for key, value in st.secrets.items():
+    os.environ[key] = value
+
 st.set_page_config(page_title="NBA AI Content Dashboard", layout="wide")
 st.title("🏀 NBA AI Content Pipeline")
 
