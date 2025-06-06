@@ -15,7 +15,15 @@ def fetch_nba_data():
         game_id = completed[0]["gameId"]
         time.sleep(1)  # avoid hitting rate limits
         full_data = boxscore.BoxScore(game_id=game_id).get_dict()
-        return full_data.get("game", {})  # return just the game section
+        game = full_data.get("game", {})
+
+        # inject player data into team objects for consistency
+        home_players = full_data.get("homeTeam", {}).get("players", [])
+        away_players = full_data.get("awayTeam", {}).get("players", [])
+        game["homeTeam"]["players"] = home_players
+        game["awayTeam"]["players"] = away_players
+        return game
+
     except Exception as e:
         print("Error fetching NBA data:", e)
         return {}
