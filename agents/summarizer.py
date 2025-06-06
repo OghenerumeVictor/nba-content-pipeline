@@ -4,8 +4,8 @@
 
 import openai
 import os
-client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def generate_summary(analysis):
     if not analysis:
