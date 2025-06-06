@@ -20,8 +20,8 @@ def fetch_nba_data():
         # inject player data into team objects for consistency
         home_players = full_data.get("homeTeam", {}).get("players", [])
         away_players = full_data.get("awayTeam", {}).get("players", [])
-        game["homeTeam"]["players"] = home_players
-        game["awayTeam"]["players"] = away_players
+        game.setdefault("homeTeam", {})["players"] = home_players
+        game.setdefault("awayTeam", {})["players"] = away_players
         return game
 
     except Exception as e:
