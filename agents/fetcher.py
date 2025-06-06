@@ -4,6 +4,10 @@
 
 from nba_api.live.nba.endpoints import scoreboard, boxscore
 import time
+import os
+from openai import OpenAI
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def fetch_nba_data():
     try:
@@ -27,3 +31,30 @@ def fetch_nba_data():
     except Exception as e:
         print("Error fetching NBA data:", e)
         return {}
+
+
+def generate_summary(analysis):
+    if not analysis:
+        return {"headline": "", "summary": ""}
+
+    performers = analysis["top_performers"]
+    performer_lines = [f"{p['name']} - {p['points']} pts" for p in performers]
+
+    prompt = (
+        f"Game Recap: {analysis['home_team']} {analysis['home_score']} - "
+        f"{analysis['away_team']} {analysis['away_score']}.\n"
+        f"Top Performers: {', '.join(performer_lines)}.\n"
+        "Write a short headline and a 2-3 sentence game summary."
+    )
+
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=150
+    )
+
+    result = response.choices[0].message.content.split("\n", 1)
+    return {
+        "headline": result[0].strip(),
+        "summary": result[1].strip() if len(result) > 1 else ""
+    }
