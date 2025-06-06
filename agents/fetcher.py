@@ -15,7 +15,7 @@ def fetch_nba_data():
         game_id = completed[0]["gameId"]
         time.sleep(1)  # avoid hitting rate limits
         full_data = boxscore.BoxScore(game_id=game_id).get_dict()
-        return full_data
+        return full_data.get("game", {})  # return just the game section
     except Exception as e:
         print("Error fetching NBA data:", e)
         return {}
