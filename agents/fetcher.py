@@ -5,9 +5,9 @@
 from nba_api.live.nba.endpoints import scoreboard, boxscore
 import time
 import os
-from openai import OpenAI
+import openai  # use legacy compatible version for now
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def fetch_nba_data():
     try:
@@ -32,7 +32,6 @@ def fetch_nba_data():
         print("Error fetching NBA data:", e)
         return {}
 
-
 def generate_summary(analysis):
     if not analysis:
         return {"headline": "", "summary": ""}
@@ -47,13 +46,13 @@ def generate_summary(analysis):
         "Write a short headline and a 2-3 sentence game summary."
     )
 
-    response = client.chat.completions.create(
+    response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=150
     )
 
-    result = response.choices[0].message.content.split("\n", 1)
+    result = response["choices"][0]["message"]["content"].split("\n", 1)
     return {
         "headline": result[0].strip(),
         "summary": result[1].strip() if len(result) > 1 else ""
