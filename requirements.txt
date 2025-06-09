@@ -7,3 +7,4 @@ openai==0.28
 requests
 python-dotenv
 nba_api
+tweepy
