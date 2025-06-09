@@ -4,6 +4,7 @@
 
 import os
 import requests
+import tweepy
 
 # Meta + WP configs
 WP_URL = os.getenv("WORDPRESS_URL")
@@ -42,17 +43,54 @@ def publish_to_wordpress(html):
     print("WordPress:", response.status_code)
 
 def publish_to_twitter(tweet):
-    print("Simulated Tweet:", tweet)
+    try:
+        api_key = os.getenv("TWITTER_API_KEY")
+        api_secret = os.getenv("TWITTER_API_SECRET")
+        access_token = os.getenv("TWITTER_ACCESS_TOKEN")
+        access_secret = os.getenv("TWITTER_ACCESS_SECRET")
+
+        auth = tweepy.OAuth1UserHandler(api_key, api_secret, access_token, access_secret)
+        api = tweepy.API(auth)
+        api.update_status(status=tweet)
+        print("Tweet posted successfully.")
+    except Exception as e:
+        print("Twitter error:", e)
 
 def publish_to_facebook(caption):
-    endpoint = f"https://graph.facebook.com/{FB_PAGE_ID}/feed"
-    requests.post(endpoint, data={"message": caption, "access_token": FB_ACCESS_TOKEN})
+    page_id = os.getenv("FACEBOOK_PAGE_ID")
+    access_token = os.getenv("FACEBOOK_ACCESS_TOKEN")
+    endpoint = f"https://graph.facebook.com/{page_id}/feed"
+    data = {
+        "message": caption,
+        "access_token": access_token
+    }
+    response = requests.post(endpoint, data=data)
+    print("Facebook response:", response.status_code, response.text)
 
 def publish_to_instagram(caption):
     image_url = fetch_thumbnail_url("NBA Highlights")
     if not image_url:
         print("No image.")
         return
+
+    ig_id = os.getenv("INSTAGRAM_BUSINESS_ID")
+    fb_token = os.getenv("FACEBOOK_ACCESS_TOKEN")
+
+    create_url = f"https://graph.facebook.com/v18.0/{ig_id}/media"
+    publish_url = f"https://graph.facebook.com/v18.0/{ig_id}/media_publish"
+
+    container_res = requests.post(create_url, data={
+        "image_url": image_url, "caption": caption, "access_token": fb_token
+    })
+    print("IG Container response:", container_res.status_code, container_res.text)
+
+    container = container_res.json()
+    if "id" in container:
+        publish_res = requests.post(publish_url, data={
+            "creation_id": container["id"], "access_token": fb_token
+        })
+        print("IG Publish response:", publish_res.status_code, publish_res.text)
+
 
     create_url = f"https://graph.facebook.com/v18.0/{IG_BUSINESS_ID}/media"
     publish_url = f"https://graph.facebook.com/v18.0/{IG_BUSINESS_ID}/media_publish"
