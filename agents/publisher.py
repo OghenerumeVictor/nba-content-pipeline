@@ -6,6 +6,7 @@ import os
 import requests
 import tweepy
 
+
 # Meta + WP configs
 WP_URL = os.getenv("WORDPRESS_URL")
 WP_USER = os.getenv("WORDPRESS_USER")
@@ -51,10 +52,20 @@ def publish_to_twitter(tweet):
 
         auth = tweepy.OAuth1UserHandler(api_key, api_secret, access_token, access_secret)
         api = tweepy.API(auth)
-        api.update_status(status=tweet)
-        print("Tweet posted successfully.")
+
+        # Verify credentials
+        api.verify_credentials()
+        print("Twitter authentication successful.")
+
+        # Post the tweet
+        status = api.update_status(status=tweet)
+        print("Tweet posted:", status.id)
+
     except Exception as e:
+        import traceback
         print("Twitter error:", e)
+        traceback.print_exc()
+
 
 def publish_to_facebook(caption):
     page_id = os.getenv("FACEBOOK_PAGE_ID")
